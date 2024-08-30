@@ -2,7 +2,7 @@ from .base import *
 import dj_database_url
 
 
-DEBUG = os.getenv('DEBUG')
+DEBUG = False
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOST','')
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOST', '').split(',')
 ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]

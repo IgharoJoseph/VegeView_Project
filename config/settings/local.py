@@ -2,7 +2,7 @@ from .base import *
 from dotenv import load_dotenv
 load_dotenv()
 
-DEBUG = os.getenv('DEBUG')
+DEBUG = True
 ALLOWED_HOSTS = []
 DATABASES = {
     'default': {
