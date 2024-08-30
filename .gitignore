@@ -131,21 +131,21 @@ docker-compose.override.yml
 .dockerignore
 
 # Images
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.tiff
-*.ico
-*.psd
-*.pspimage
-*.tga
-*.thm
-*.xcf
-*.yuv
-*.dds
-*.ptx
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.bmp
+# *.tiff
+# *.ico
+# *.psd
+# *.pspimage
+# *.tga
+# *.thm
+# *.xcf
+# *.yuv
+# *.dds
+# *.ptx
 
 # Security files
 *.pem
