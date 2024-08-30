@@ -1,0 +1,70 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <script src="{% static 'index.js' %}" defer></script>
+    <title>VegeView  {% block title %}
+        {% endblock %}
+    </title>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+           {% include 'partials/header.html' %}
+        </div>
+    </header>
+    <section class="hero">
+        <div class="hero-text">
+            <h1 class="hero-title">Explore Vegetation Insights with VegeView</h1>
+            <p class="hero-subtitle">Your platform for real-time NDVI data, customizable maps, and downloadable reports.</p>
+            <a href="login" class="hero-button">Get Started</a>
+
+            <style>
+                .hero {
+                    background: url("{% static 'img/hero.jpg' %}") center/cover no-repeat;
+                    background-blend-mode: overlay;
+                    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay for better text contrast */   
+                }
+            </style>
+        </div>
+    </section>
+    <section class="features">
+        <div class="features-container">
+            <h2 class="features-title">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <img src="{% static 'img/NDVI.jpg' %}" alt="real-time-data" class="feature-icon">
+                    <h3 class="feature-title">Real-time NDVI Data</h3>
+                    <p class="feature-description">Stay updated with the latest vegetation insights.</p>
+                </div>
+                <div class="feature-card">
+                    <img src="{% static 'img/map1.png' %}" alt="customizable-maps" class="feature-icon">
+                    <h3 class="feature-title">Customizable Maps</h3>
+                    <p class="feature-description">Tailor maps to suit your analysis needs.</p>
+                </div>
+                <div class="feature-card">
+                    <img src="{% static 'img/reports.png' %}" alt="downloadable-reports" class="feature-icon">
+                    <h3 class="feature-title">Downloadable Reports</h3>
+                    <p class="feature-description">Easily download reports for further analysis.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="subscription">
+        <div class="subscription-container">
+            <h2 class="subscription-title">Subscribe for Updates</h2>
+            <p class="subscription-text">Stay informed with the latest news and features.</p>
+            <div class="subscription-form">
+                <input type="email" placeholder="Enter your email" class="subscription-input">
+                <button class="subscription-button">Subscribe</button>
+            </div>
+        </div>
+    </section>
+    <footer class="footer">
+        {% include 'partials/footer.html' %}
+    </footer>
+</body>
+</html>

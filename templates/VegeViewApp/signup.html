@@ -1,0 +1,48 @@
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VegeView</title>
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+    <script src="{% static 'js/signup.js' %}" defer></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            {% include 'partials/header.html' %}
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="register-form">
+            <h2>Create Your Account</h2>
+            <form id="registerForm">
+                <label for="full-name">Full Name</label>
+                <input type="text" id="full-name" name="full-name" placeholder="John Doe" required>
+                
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="johndoe@example.com" required>
+                
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="********" required>
+                
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="********" required>
+                
+                <button type="submit">Sign Up</button>
+                
+                <a href="login" class="forgot-password">Already have an account? Login</a>
+            </form>
+            <div class="footer-links">
+                <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+                <span>|</span>
+                <a href="terms.html" class="terms-link">Terms of Service</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
