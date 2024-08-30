@@ -1,0 +1,161 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Compiled source files
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+*.egg
+*.egg-info/
+dist/
+build/
+pip-log.txt
+
+# Django
+*.log
+*.pot
+*.pyc
+*.sqlite3
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+.env
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+.pnpm-debug.log
+
+# JavaScript/React
+/build/
+.idea/
+.vscode/
+*.log
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Ruby
+*.gem
+*.rbc
+.ruby-version
+.ruby-gemset
+Gemfile.lock
+.yarn-cache/
+
+# Java
+*.war
+*.ear
+*.class
+# Mobile development
+*.ipa
+*.apk
+*.obj
+
+# Visual Studio
+.vscode/
+*.csproj.user
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# macOS
+*.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Linux
+*~
+.nfs*
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+
+# Backup files
+*.bak
+*.bak2
+*.save
+
+# IDEs and Editors
+.idea/
+*.iml
+*.iws
+*.ipr
+*.suo
+*.vs/
+*.swp
+.vscode/
+.vs/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+
+# Ansible
+*.retry
+
+# Docker
+*.env
+docker-compose.override.yml
+.dockerignore
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.psd
+*.pspimage
+*.tga
+*.thm
+*.xcf
+*.yuv
+*.dds
+*.ptx
+
+# Security files
+*.pem
+*.key
+*.crt
+
+# Others
+*.bak
+*.old
+*.orig
+*.rej
+*.log
+*.gz
