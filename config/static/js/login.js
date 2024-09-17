@@ -1,24 +1,16 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('.login-form');
-    
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
 
-        // Basic validation for email and password
-        if (!validateEmail(email)) {
-            alert('Please enter a valid email address!');
-            return;
-        }
-
-        if (!password) {
-            alert('Password cannot be empty!');
-            return;
-        }
-
-    });
+    // Basic validation (you might want to enhance this)
+    if (email && password) {
+        alert('Login successful!');
+        // Here you can add code to handle the login process, e.g., send data to the server
+    } else {
+        alert('Please fill out all fields.');
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,9 +22,3 @@ document.addEventListener('DOMContentLoaded', () => {
         menuButton.classList.toggle('active');
     });
 });
-
-// Function to validate email format
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
