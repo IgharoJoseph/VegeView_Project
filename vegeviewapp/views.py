@@ -57,7 +57,7 @@ def user_login(request):
                 if authenticated_user is not None:
                     # Log the user in
                     auth_login(request, authenticated_user)
-                    return redirect('HomePage')  # Replace 'HomePage' with your redirect URL
+                    return redirect('HomePage')  
                 else:
                     # Invalid password
                     form.add_error(None, 'Invalid login credentials')

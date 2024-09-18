@@ -126,3 +126,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 mail = os.getenv("MAIL")
 mail_password = os.getenv("MAIL_PASSWORD")
+
