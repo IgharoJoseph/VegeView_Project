@@ -1,0 +1,396 @@
+/* Reset and Basic Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #002b36;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure header is positioned for absolute child elements */
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 40px;
+    width: 40px;
+    margin-right: 1rem;
+}
+
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #00bcd4;
+}
+
+.menu-button {
+    display: none; /* Hide by default, show on mobile */
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 1rem; /* Align to the right */
+    top: 1rem; /* Align to the top */
+    z-index: 11; /* Ensure it's above other elements */
+}
+
+.menu-icon {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: #ffffff;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background-color: #ffffff;
+    transition: transform 0.3s ease;
+}
+
+.menu-icon::before {
+    top: -8px;
+}
+
+.menu-icon::after {
+    top: 8px;
+}
+
+/* Rotate the middle bar to create the "X" shape */
+.menu-button.active .menu-icon {
+    transform: rotate(45deg);
+}
+
+.menu-button.active .menu-icon::before {
+    transform: rotate(-45deg) translate(-4px, 0);
+}
+
+.menu-button.active .menu-icon::after {
+    transform: rotate(-45deg) translate(4px, 0);
+}
+
+/* Header Right Styles */
+.header-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    background-color: #eeeeee;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #dddddd;
+}
+
+.btn-accent {
+    background-color: #00bcd4;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-accent:hover {
+    background-color: #0097a7;
+}
+
+/* Mobile View Adjustments */
+@media (max-width: 768px) {
+    .nav {
+        display: none; /* Hide navigation on mobile by default */
+        flex-direction: column; /* Stack menu items vertically */
+        position: absolute;
+        top: 60px; /* Position below the header */
+        right: 0;
+        background-color: #002b36; /* Match header background */
+        width: 100%; /* Full width for dropdown */
+        padding: 1rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 10; /* Ensure it appears above other content */
+    }
+
+    .nav.active {
+        display: flex; /* Show navigation when active */
+    }
+
+    .header-right {
+        display: none; /* Hide right-side elements on mobile */
+    }
+
+    .menu-button {
+        display: flex; /* Show menu button on mobile */
+    }
+
+    .nav-link {
+        color: #ffffff;
+        text-decoration: none;
+        padding: 0.5rem;
+        display: block;
+    }
+}
+
+
+/* Hero Section Styles */
+.hero {
+    background-blend-mode: overlay;
+    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay for better text contrast */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    align-items: center; /* Center content vertically */
+    justify-content: center; /* Center content horizontally */
+    text-align: center; /* Center text within the hero */
+    color: #ffffff; /* White text color for contrast */
+    padding: 0 2rem; /* Horizontal padding for small screens */
+    box-sizing: border-box; /* Include padding in height calculation */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero {
+        padding: 0 1rem; /* Reduce padding on smaller screens */
+    }
+}
+
+.hero-content {
+    max-width: 800px; /* Limit the width of the content for readability */
+}
+
+.hero h1 {
+    font-size: 3rem; /* Adjust font size for better visibility */
+    margin-bottom: 1rem; /* Spacing between heading and paragraph */
+}
+
+.hero p {
+    font-size: 1.25rem; /* Adjust font size for better readability */
+    margin-bottom: 1.5rem; /* Spacing between paragraph and button */
+}
+
+.hero a {
+    display: inline-block;
+    background-color: #ff5722; /* Accent color for the button */
+    color: #ffffff; /* White text color on the button */
+    padding: 0.75rem 2rem; /* Button padding */
+    border-radius: 0.5rem; /* Rounded corners for the button */
+    text-decoration: none; /* Remove underline from the link */
+    font-size: 1rem; /* Font size for the button */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.hero a:hover {
+    background-color: #e64a19; /* Darker shade for hover effect */
+}
+
+
+/* Features Section Styles */
+.features {
+    padding: 4rem 2rem;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;     /* Center vertically */
+    min-height: 60vh;        /* Ensure the container takes up at least 60% of viewport height */
+}
+
+.features-container {
+    max-width: 80rem;        /* Limit the maximum width of the container */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;     /* Center align children elements horizontally */
+    text-align: center;      /* Center text */
+}
+
+.features-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.features-grid {
+    display: flex;
+    justify-content: center; /* Center items horizontally */
+    align-items: center;     /* Center items vertically within the container */
+    gap: 2rem;               /* Space between items */
+    flex-wrap: wrap;         /* Allow items to wrap to the next line if they exceed container width */
+}
+
+.feature-card {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;      /* Center text inside the card */
+    flex: 1 1 280px;         /* Flex-grow, flex-shrink, and base width for responsive layout */
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+    height: 80px;
+    width: 80px;
+    margin-bottom: 1rem;
+}
+
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.feature-description {
+    color: #666;
+}
+
+
+
+
+/* Subscription Section Styles */
+.subscription {
+    background-color: #eeeeee;
+    padding: 3rem 2rem;
+}
+
+.subscription-container {
+    max-width: 50rem;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.subscription-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.subscription-text {
+    margin-bottom: 1.5rem;
+}
+
+.subscription-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+}
+
+.subscription-input {
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ccc;
+    width: 100%;
+    max-width: 400px;
+}
+
+.subscription-button {
+    background-color: #00bcd4;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.subscription-button:hover {
+    background-color: #0097a7;
+}
+
+/* Footer Styles */
+.footer {
+    background-color: #002b36;
+    color: #f4f6f9;
+    padding: 2rem;
+    text-align: center;
+}
+
+.footer-links {
+    margin: 1rem 0;
+}
+
+.footer-link {
+    color: #f4f6f9;
+    text-decoration: none;
+    margin: 0 0.75rem;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #00bcd4;
+}
+
+.footer-social {
+    margin-top: 1rem;
+}
+
+.social-icon {
+    display: inline-block;
+    margin: 0 0.5rem;
+}
+
+.social-icon img {
+    height: 24px;
+    width: 24px;
+    vertical-align: middle;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav {
+        display: none;
+    }
+
+    .menu-button {
+        display: block;
+    }
+
+    .subscription-form {
+        flex-direction: column;
+    }
+}

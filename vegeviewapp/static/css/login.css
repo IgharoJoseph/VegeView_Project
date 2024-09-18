@@ -1,0 +1,240 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #002b36;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative; /* Ensure header is positioned for absolute child elements */
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 40px;
+    width: 40px;
+    margin-right: 1rem;
+}
+
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #00bcd4;
+}
+
+.menu-button {
+    display: none; /* Hide by default, show on mobile */
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 1rem; /* Align to the right */
+    top: 1rem; /* Align to the top */
+    z-index: 11; /* Ensure it's above other elements */
+}
+
+.menu-icon {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: #ffffff;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background-color: #ffffff;
+    transition: transform 0.3s ease;
+}
+
+.menu-icon::before {
+    top: -8px;
+}
+
+.menu-icon::after {
+    top: 8px;
+}
+
+/* Rotate the middle bar to create the "X" shape */
+.menu-button.active .menu-icon {
+    transform: rotate(45deg);
+}
+
+.menu-button.active .menu-icon::before {
+    transform: rotate(-45deg) translate(-4px, 0);
+}
+
+.menu-button.active .menu-icon::after {
+    transform: rotate(-45deg) translate(4px, 0);
+}
+
+/* Header Right Styles */
+.header-right {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    background-color: #eeeeee;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #dddddd;
+}
+
+.btn-accent {
+    background-color: #00bcd4;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-accent:hover {
+    background-color: #0097a7;
+}
+
+/* Mobile View Adjustments */
+@media (max-width: 768px) {
+    .nav {
+        display: none; /* Hide navigation on mobile by default */
+        flex-direction: column; /* Stack menu items vertically */
+        position: absolute;
+        top: 60px; /* Position below the header */
+        right: 0;
+        background-color: #002b36; /* Match header background */
+        width: 100%; /* Full width for dropdown */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 10; /* Ensure it appears above other content */
+    }
+
+    .nav.active {
+        display: flex; /* Show navigation when active */
+    }
+
+    .header-right {
+        display: none; /* Hide right-side elements on mobile */
+    }
+
+    .menu-button {
+        display: flex; /* Show menu button on mobile */
+    }
+
+    .nav-link {
+        color: #ffffff;
+        text-decoration: none;
+        padding: 0.5rem;
+        display: block;
+    }
+}
+
+
+/* Form Container Styles */
+.container {
+    margin-top: 70px; /* Adjust based on header height */
+    padding: 20px;
+}
+
+.login-form, .register-form {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h2, .register-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #00bcd4;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0ca8bd;
+}
+
+.forgot-password {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.footer-links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.footer-links a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
