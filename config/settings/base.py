@@ -128,10 +128,6 @@ mail = os.getenv("MAIL")
 mail_password = os.getenv("MAIL_PASSWORD")
 
 
-import logging
-import logging.config
-from .logging import LOGGING  
-
-
-LOGGING_CONFIG = None  # Disable Django's default logging config
-logging.config.dictConfig(LOGGING)
+DJANGO_SUPERUSER_USERNAME = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+DJANGO_SUPERUSER_EMAIL = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+DJANGO_SUPERUSER_PASSWORD = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
