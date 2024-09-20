@@ -127,3 +127,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 mail = os.getenv("MAIL")
 mail_password = os.getenv("MAIL_PASSWORD")
 
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'vegeviewapp': {  
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
