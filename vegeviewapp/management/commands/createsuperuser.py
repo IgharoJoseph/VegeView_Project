@@ -6,7 +6,6 @@ class Command(createsuperuser.Command):
     help = 'Create a superuser using environment variables'
 
     def add_arguments(self, parser):
-        # Add the --no-input argument to prevent prompting
         parser.add_argument('--no-input', action='store_true', help='Avoid prompting for input')
 
     def handle(self, *args, **options):
@@ -23,7 +22,7 @@ class Command(createsuperuser.Command):
             self.stdout.write(f"User '{username}' already exists.")
             return
 
-        # Call the superuser command without input prompts
+        # Create the superuser without input prompts
         super().handle(*args, **options)
 
         user = self.UserModel._default_manager.get(username=username)
