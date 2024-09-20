@@ -127,7 +127,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 mail = os.getenv("MAIL")
 mail_password = os.getenv("MAIL_PASSWORD")
 
-
-DJANGO_SUPERUSER_USERNAME = os.environ.get('DJANGO_SUPERUSER_USERNAME')
-DJANGO_SUPERUSER_EMAIL = os.environ.get('DJANGO_SUPERUSER_EMAIL')
-DJANGO_SUPERUSER_PASSWORD = os.environ.get('DJANGO_SUPERUSER_PASSWORD')

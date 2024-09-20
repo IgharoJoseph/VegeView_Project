@@ -3,7 +3,7 @@ import dj_database_url
 from dotenv import load_dotenv
 load_dotenv()
 
-DEBUG = True
+DEBUG = False
 # ALLOWED_HOSTS = os.getenv('ALLOWED_HOST','')
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOST', '').split(',')
 ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
