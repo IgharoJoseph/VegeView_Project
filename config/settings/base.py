@@ -128,24 +128,10 @@ mail = os.getenv("MAIL")
 mail_password = os.getenv("MAIL_PASSWORD")
 
 
+import logging
+import logging.config
+from .logging import LOGGING  
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-        'vegeviewapp': {  
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}
 
+LOGGING_CONFIG = None  # Disable Django's default logging config
+logging.config.dictConfig(LOGGING)
