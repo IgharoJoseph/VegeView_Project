@@ -1,32 +1,44 @@
+import logging
 import os
 from django.contrib.auth.management.commands import createsuperuser
 from django.core.management import CommandError
 
+logger = logging.getLogger(__name__)
+
 class Command(createsuperuser.Command):
-    help = 'Create a superuser using environment variables'
+    help = 'Create a superuser, and allow password to be provided'
 
     def add_arguments(self, parser):
-        parser.add_argument('--no-input', action='store_true', help='Avoid prompting for input')
+        super().add_arguments(parser)
 
     def handle(self, *args, **options):
         username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+        email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
         password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
-        if not username:
-            raise CommandError("DJANGO_SUPERUSER_USERNAME environment variable is required.")
-        if not password:
-            raise CommandError("DJANGO_SUPERUSER_PASSWORD environment variable is required.")
+        logger.debug(f"Username: {username}, Email: {email}, Password: {'*' * len(password) if password else None}")
+
+        if not username or not password:
+            logger.error("Username or password is missing from environment variables.")
+            raise CommandError("Username and password must be set in environment variables.")
 
         # Check if the user already exists
-        if self.UserModel._default_manager.filter(username=username).exists():
-            self.stdout.write(f"User '{username}' already exists.")
+        exists = self.UserModel._default_manager.filter(username=username).exists()
+        if exists:
+            logger.info(f"User '{username}' already exists.")
             return
 
-        # Create the superuser without input prompts
-        super().handle(*args, **options)
+        try:
+            # Create superuser
+            super().handle(*args, **options)
 
-        user = self.UserModel._default_manager.get(username=username)
-        user.set_password(password)
-        user.save()
+            # Set the password
+            user = self.UserModel._default_manager.get(username=username)
+            user.set_password(password)
+            user.save()
 
-        self.stdout.write(self.style.SUCCESS(f'Superuser "{username}" created successfully.'))
+            logger.info(f"Superuser '{username}' created successfully.")
+        except Exception as e:
+            logger.exception("Failed to create superuser.")
+            raise CommandError("An error occurred while creating the superuser.")
+
