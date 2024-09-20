@@ -9,4 +9,4 @@ python manage.py collectstatic --no-input
 python manage.py migrate
 
 # Create a superuser if not exists using environment variables
-python manage.py create_superuser --no-input
+python manage.py create_superuser
