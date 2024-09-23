@@ -22,9 +22,9 @@ class UserSignupForm(forms.ModelForm):
     
     email = forms.EmailField(max_length=254, required=True, widget=forms.EmailInput(attrs={'placeholder': 'johndoe@example.com'}))
     
-    country = CountryField().formfield()
+    country = CountryField().formfield(required=True)
 
-    phone_number = SplitPhoneNumberField()
+    phone_number = SplitPhoneNumberField(required=True)
 
     organization = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Your Organization'}))
     job_title = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Your Job Title'}))
