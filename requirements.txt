@@ -4,12 +4,10 @@ colorama==0.4.6
 dj-database-url==2.2.0
 Django==5.1
 django-countries==7.6.1
-django-phonenumber-field==8.0.0
 djangorestframework==3.15.2
 gunicorn==23.0.0
 h11==0.14.0
 packaging==24.1
-phonenumbers==8.13.45
 phonenumberslite==8.13.45
 psycopg2==2.9.9
 python-decouple==3.8
