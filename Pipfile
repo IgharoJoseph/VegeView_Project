@@ -22,6 +22,8 @@ uvicorn = "==0.30.6"
 whitenoise = "==6.7.0"
 split-settings = "*"
 djangorestframework = "*"
+django-countries = "*"
+django-phonenumber-field = {extras = ["phonenumberslite"], version = "*"}
 
 [dev-packages]
 

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from datetime import date
+from django_countries.fields import CountryField
+from phonenumber_field.modelfields import PhoneNumberField
 
 class UserSignupForm(forms.ModelForm):
     # Fields for user details
@@ -20,6 +22,10 @@ class UserSignupForm(forms.ModelForm):
     
     email = forms.EmailField(max_length=254, required=True, widget=forms.EmailInput(attrs={'placeholder': 'johndoe@example.com'}))
     
+    country = CountryField().formfield()
+
+    phone_number = PhoneNumberField().formfield()
+
     organization = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Your Organization'}))
     job_title = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Your Job Title'}))
     
@@ -34,7 +40,7 @@ class UserSignupForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'middle_name', 'last_name', 'username', 'gender', 'date_of_birth', 'email', 
+        fields = ['first_name', 'middle_name', 'last_name', 'username', 'gender', 'date_of_birth', 'email', 'phone_number', 'country',
                   'organization', 'job_title', 'data_use', 'additional_details', 'password', 'confirm_password']
 
     def clean_date_of_birth(self):

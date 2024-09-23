@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from .forms import UserSignupForm, UserLoginForm
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from .serializers import UserSignupSerializer
 from django.conf import settings
+from django.contrib import messages
 
 
 # Traditional view for rendering HTML templates
@@ -57,7 +59,7 @@ def user_login(request):
                 if authenticated_user is not None:
                     # Log the user in
                     auth_login(request, authenticated_user)
-                    return redirect('HomePage')  
+                    return redirect('Data-Access-Viewer')  
                 else:
                     # Invalid password
                     form.add_error(None, 'Invalid login credentials')
@@ -69,7 +71,15 @@ def user_login(request):
 
     return render(request, 'vegeviewapp/login.html', {'form': form})
 
-
+def user_logout(request):
+    auth_logout(request)
+    messages.success(request, 'You have been logged out successfully')
+    return render(request, 'vegeviewapp/index.html')
+    
 
 def forgotpassword(request):
     return render(request, 'vegeviewapp/forgotpassword.html')
+
+@login_required(login_url='Login') 
+def data_access_viewer(request):
+    return render (request, 'vegeviewapp/data-access-viewer.html')
