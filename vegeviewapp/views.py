@@ -13,6 +13,10 @@ def index(request):
     return render(request, 'vegeviewapp/index.html')
 
 def signup(request):
+
+    if request.user.is_authenticated:
+        return redirect('HomePage')
+     
     if request.method == 'POST':
         form = UserSignupForm(request.POST)
         if form.is_valid():
@@ -37,6 +41,9 @@ def signup(request):
 
 
 def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('HomePage')
+    
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
         if form.is_valid():
