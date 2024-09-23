@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from datetime import date
 from django_countries.fields import CountryField
-from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.formfields import SplitPhoneNumberField
 
 class UserSignupForm(forms.ModelForm):
     # Fields for user details
@@ -24,7 +24,7 @@ class UserSignupForm(forms.ModelForm):
     
     country = CountryField().formfield()
 
-    phone_number = PhoneNumberField().formfield()
+    phone_number = SplitPhoneNumberField()
 
     organization = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Your Organization'}))
     job_title = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'placeholder': 'Your Job Title'}))

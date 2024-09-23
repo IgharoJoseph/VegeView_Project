@@ -24,6 +24,7 @@ split-settings = "*"
 djangorestframework = "*"
 django-countries = "*"
 django-phonenumber-field = {extras = ["phonenumberslite"], version = "*"}
+babel = "*"
 
 [dev-packages]
 
