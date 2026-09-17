@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
+        <!-- Leaflet-Geoman Drawing Tools CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
@@ -193,6 +195,38 @@
             gap: 6px;
             transition: background 0.2s;
         }
+        
+        .btn-draw-plot {
+            background: #0284c7;
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-draw-plot:hover {
+            background: #0369a1;
+        }
+        .drawing-banner {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
         .btn-add-plot:hover {
             background: var(--primary-hover);
         }
@@ -386,6 +420,7 @@
                     <span style="font-size: 0.85rem; color: #64748b;">Real-time NDVI vegetation density and health alerts</span>
                 </div>
 
+                <div id="drawBanner" class="drawing-banner"><span>📐 <strong>Drawing Mode Active:</strong> Click on the farm boundary points to outline your field plot. Click the starting point to finish.</span><button id="cancelDrawBtn" style="background:#cbd5e1;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-weight:700;">Cancel</button></div>
                 <div id="fieldMap"></div>
 
                 <div class="ndvi-legend">
@@ -400,7 +435,7 @@
             <div class="sidebar-card">
                 <div class="sidebar-head">
                     <h3>My Field Plots ({{ fields|length }})</h3>
-                    <button class="btn-add-plot" id="openAddModalBtn">+ Add Plot</button>
+                    <div style="display:flex; gap:8px;"><button class="btn-draw-plot" id="startDrawBtn">✏️ Draw Plot</button><button class="btn-add-plot" id="openAddModalBtn">+ Manual</button></div>
                 </div>
 
                 <div class="fields-list">
@@ -443,6 +478,7 @@
             </div>
             <form method="POST" action="{% url 'FieldMap' %}">
                 {% csrf_token %}
+                <input type="hidden" id="boundaryGeojson" name="boundary_geojson" value="">
                 <div class="form-row">
                     <label for="plotName">Plot Name</label>
                     <input type="text" id="plotName" name="name" class="form-input" placeholder="e.g. South Terrace - Sweet Potatoes" required>
@@ -493,12 +529,14 @@
     </div>
 
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+    <script style="display:none" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         var fieldsData = {{ fields_json|safe }};
         var map = L.map('fieldMap').setView([9.083, 8.676], 14);
 
-        // CARTO Voyager (OpenStreetMap data served via CARTO CDN with compliant usage) and Esri Satellite
+        // CARTO Voyager & Esri Satellite
         var streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
             subdomains: 'abcd',
@@ -511,62 +549,161 @@
         });
 
         var baseMaps = {
-            "Street & Topo (OSM / CARTO)": streetLayer,
+            "Street (OSM / CARTO)": streetLayer,
             "Satellite Imagery (Esri)": satelliteLayer
         };
         L.control.layers(baseMaps).addTo(map);
 
-        var markers = [];
-
-        // Plot each field with color-coded NDVI circle overlay
-        fieldsData.forEach(function(f) {
-            var circle = L.circle([f.lat, f.lng], {
-                color: f.color,
-                fillColor: f.color,
-                fillOpacity: 0.35,
-                radius: Math.sqrt(f.area * 10000 / Math.PI) * 1.4
-            }).addTo(map);
-
-            var popupContent = `
-                <div style="font-family: inherit; min-width: 190px;">
-                    <div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${f.name}</div>
-                    <div style="color: #64748b; font-size: 0.85rem; margin-bottom: 8px;">Crop: <strong>${f.crop}</strong> (${f.area} Ha)</div>
-                    <div style="background: ${f.color}20; color: ${f.color}; font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; display: inline-block;">
-                        ${f.ndvi} NDVI - ${f.health_display}
-                    </div>
-                    <div style="font-size: 0.82rem; color: #475569; margin-top: 8px;">💧 ${f.irrigation}</div>
-                    ${f.notes ? `<div style="font-size: 0.8rem; color: #64748b; margin-top: 4px; font-style: italic;">"${f.notes}"</div>` : ''}
-                </div>
-            `;
-            circle.bindPopup(popupContent);
-            markers.push(circle);
+        // Configure Leaflet-Geoman toolbar
+        map.pm.addControls({
+            position: 'topleft',
+            drawCircle: false,
+            drawCircleMarker: false,
+            drawMarker: false,
+            drawPolyline: false,
+            drawText: false,
+            cutPolygon: false,
+            rotateMode: false,
+            drawPolygon: true,
+            drawRectangle: true,
+            editMode: false,
+            dragMode: false,
+            removalMode: false
         });
 
-        // Fit map bounds to show all plots
-        if (markers.length > 0) {
-            var group = new L.featureGroup(markers);
-            map.fitBounds(group.getBounds().pad(0.2));
+        // Helper function: calculate polygon area in Hectares
+        function calculateHectares(latlngs) {
+            var coords = latlngs[0] || latlngs;
+            var areaM2 = 0;
+            if (coords.length > 2) {
+                var d2r = Math.PI / 180;
+                for (var i = 0; i < coords.length; i++) {
+                    var p1 = coords[i];
+                    var p2 = coords[(i + 1) % coords.length];
+                    areaM2 += (p2.lng - p1.lng) * d2r * (2 + Math.sin(p1.lat * d2r) + Math.sin(p2.lat * d2r));
+                }
+                areaM2 = Math.abs(areaM2 * 6378137.0 * 6378137.0 / 2.0);
+            }
+            return (areaM2 / 10000);
         }
 
-        function focusField(lat, lng, name, ndvi, health) {
-            map.setView([lat, lng], 15, { animate: true });
+        // Helper function: find centroid of latlngs
+        function getCentroid(latlngs) {
+            var pts = latlngs[0] || latlngs;
+            var sumLat = 0, sumLng = 0;
+            pts.forEach(function(p) { sumLat += p.lat; sumLng += p.lng; });
+            return { lat: sumLat / pts.length, lng: sumLng / pts.length };
         }
 
-        // Modal Controls
+        var drawnLayer = null;
+        var drawBanner = document.getElementById('drawBanner');
+
+        // Handle drawing button
+        document.getElementById('startDrawBtn').onclick = function() {
+            map.pm.enableDraw('Polygon', {
+                snappable: true,
+                templineStyle: { color: '#0284c7', weight: 2 },
+                hintlineStyle: { color: '#0284c7', dashArray: [5, 5] }
+            });
+            drawBanner.style.display = 'flex';
+        };
+
+        document.getElementById('cancelDrawBtn').onclick = function() {
+            map.pm.disableDraw();
+            drawBanner.style.display = 'none';
+        };
+
+        // When user completes drawing a polygon or rectangle on the map
+        map.on('pm:create', function(e) {
+            drawBanner.style.display = 'none';
+            if (drawnLayer) { map.removeLayer(drawnLayer); }
+            drawnLayer = e.layer;
+            drawnLayer.setStyle({ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.35 });
+
+            var latlngs = drawnLayer.getLatLngs();
+            var ha = calculateHectares(latlngs);
+            var center = getCentroid(latlngs);
+            var geojson = drawnLayer.toGeoJSON().geometry;
+
+            // Pre-populate modal
+            document.getElementById('plotArea').value = ha ? ha.toFixed(2) : 1.5;
+            document.getElementById('plotLat').value = center.lat.toFixed(5);
+            document.getElementById('plotLng').value = center.lng.toFixed(5);
+            document.getElementById('boundaryGeojson').value = JSON.stringify(geojson);
+
+            // Open modal to finalize plot details
+            document.getElementById('addPlotModal').classList.add('open');
+        });
+
+        // Render existing field plots (Polygons if boundary exists, otherwise circles)
+        var layersById = {};
+        var bounds = [];
+
+        fieldsData.forEach(function(f) {
+            var layer;
+            var notesHtml = f.notes ? ('<div style="font-size: 0.8rem; color: #64748b; margin-top: 4px; font-style: italic;">"' + f.notes + '"</div>') : '';
+            var popupContent = '<div style="font-family: inherit; min-width: 200px;">' +
+                '<div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">' + f.name + '</div>' +
+                '<div style="color: #64748b; font-size: 0.85rem; margin-bottom: 8px;">Crop: <strong>' + f.crop + '</strong> (' + f.area + ' Ha)</div>' +
+                '<div style="background: ' + f.color + '20; color: ' + f.color + '; font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; display: inline-block;">' +
+                    f.ndvi + ' NDVI - ' + f.health_display +
+                '</div>' +
+                '<div style="font-size: 0.82rem; color: #475569; margin-top: 8px;">💧 ' + f.irrigation + '</div>' +
+                notesHtml +
+            '</div>';
+
+            if (f.boundary) {
+                layer = L.geoJSON(f.boundary, {
+                    style: {
+                        color: f.color,
+                        fillColor: f.color,
+                        fillOpacity: 0.45,
+                        weight: 2.5
+                    }
+                }).addTo(map);
+                bounds.push(layer.getBounds());
+            } else {
+                layer = L.circle([f.lat, f.lng], {
+                    color: f.color,
+                    fillColor: f.color,
+                    fillOpacity: 0.40,
+                    weight: 2,
+                    radius: Math.sqrt(f.area * 10000 / Math.PI) * 1.3
+                }).addTo(map);
+                bounds.push(layer.getBounds());
+            }
+
+            layer.bindPopup(popupContent);
+            layersById[f.id] = { layer: layer, lat: f.lat, lng: f.lng };
+        });
+
+        if (bounds.length > 0) {
+            var groupBounds = bounds[0];
+            for (var i = 1; i < bounds.length; i++) {
+                groupBounds.extend(bounds[i]);
+            }
+            map.fitBounds(groupBounds, { padding: [40, 40], maxZoom: 16 });
+        }
+
+        // Side list click focus
+        window.focusField = function(lat, lng, name, ndvi, health) {
+            map.flyTo([lat, lng], 16, { animate: true, duration: 1.2 });
+            for (var id in layersById) {
+                var item = layersById[id];
+                if (Math.abs(item.lat - lat) < 0.0001 && Math.abs(item.lng - lng) < 0.0001) {
+                    item.layer.openPopup();
+                }
+            }
+        };
+
+        // Modal toggle
         var modal = document.getElementById('addPlotModal');
-        document.getElementById('openAddModalBtn').onclick = function() { modal.classList.add('open'); };
+        document.getElementById('openAddModalBtn').onclick = function() {
+            document.getElementById('boundaryGeojson').value = '';
+            modal.classList.add('open');
+        };
         document.getElementById('closeAddModalBtn').onclick = function() { modal.classList.remove('open'); };
         document.getElementById('cancelModalBtn').onclick = function() { modal.classList.remove('open'); };
-
-        // Click map to drop coordinates
-        map.on('click', function(e) {
-            document.getElementById('plotLat').value = e.latlng.lat.toFixed(4);
-            document.getElementById('plotLng').value = e.latlng.lng.toFixed(4);
-        });
     </script>
-
-    <footer class="footer">
-        {% include 'partials/footer.html' %}
-    </footer>
 </body>
 </html>
