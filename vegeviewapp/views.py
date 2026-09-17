@@ -341,13 +341,13 @@ def field_map_view(request):
         notes = request.POST.get('notes', '').strip()
         boundary_geojson = request.POST.get('boundary_geojson', '').strip()
 
-        # Parse coordinates
+        # Parse coordinates with comma-replacement and safe bounds
         try:
-            lat = float(lat_raw)
+            lat = float(str(lat_raw).replace(',', '.').strip()) if lat_raw else 9.0820
         except (ValueError, TypeError):
             lat = 9.0820
         try:
-            lng = float(lng_raw)
+            lng = float(str(lng_raw).replace(',', '.').strip()) if lng_raw else 8.6753
         except (ValueError, TypeError):
             lng = 8.6753
 
