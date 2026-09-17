@@ -340,6 +340,7 @@ def field_map_view(request):
         ndvi = float(request.POST.get('ndvi', 0.72))
         irrigation = request.POST.get('irrigation', 'Drip')
         notes = request.POST.get('notes', '').strip()
+        boundary_geojson = request.POST.get('boundary_geojson', '').strip()
 
         crop_obj = Vegetable.objects.filter(pk=crop_id).first() if crop_id else None
 
@@ -353,6 +354,7 @@ def field_map_view(request):
             current_ndvi=ndvi,
             irrigation_system=irrigation,
             notes=notes
+            boundary_geojson=boundary_geojson,
         )
         field.update_health_status()
         field.save()
@@ -384,6 +386,7 @@ def field_map_view(request):
             'color': color,
             'irrigation': f.irrigation_system,
             'notes': f.notes
+            'boundary': json.loads(f.boundary_geojson) if f.boundary_geojson else None,
         })
 
     return render(request, 'vegeviewapp/field_map.html', {
