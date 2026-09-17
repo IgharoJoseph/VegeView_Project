@@ -46,8 +46,22 @@ class PestDisease(models.Model):
         ('high', 'High / Severe'),
     ]
 
+    PART_CHOICES = [
+        ('leaves', 'Leaves & Foliage'),
+        ('stem', 'Stem & Shoots'),
+        ('fruit', 'Fruit / Pod'),
+        ('roots', 'Roots & Soil Level'),
+        ('whole', 'Whole Plant'),
+    ]
+
     name = models.CharField(max_length=150)
     problem_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='disease')
+    affected_part = models.CharField(
+        max_length=20,
+        choices=PART_CHOICES,
+        default='leaves',
+        help_text="Primary plant part where symptoms manifest"
+    )
     causal_agent = models.CharField(
         max_length=100,
         blank=True,
