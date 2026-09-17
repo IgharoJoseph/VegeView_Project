@@ -536,11 +536,10 @@
         var fieldsData = {{ fields_json|safe }};
         var map = L.map('fieldMap').setView([9.083, 8.676], 14);
 
-        // CARTO Voyager & Esri Satellite
-        var streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                // Esri ArcGIS Basemaps (Completely free, no API key required)
+        var streetLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,
-            subdomains: 'abcd',
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, METI'
         }).addTo(map);
 
         var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -548,9 +547,15 @@
             attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
         });
 
+        var topoLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme'
+        });
+
         var baseMaps = {
-            "Street (OSM / CARTO)": streetLayer,
-            "Satellite Imagery (Esri)": satelliteLayer
+            "Esri Street Map": streetLayer,
+            "Satellite Imagery": satelliteLayer,
+            "Topographic": topoLayer
         };
         L.control.layers(baseMaps).addTo(map);
 
