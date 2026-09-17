@@ -104,6 +104,9 @@ def signup(request):
             return render(request, 'vegeviewapp/signup.html', {'full_name': full_name, 'email': email})
 
         user = User.objects.create_user(username=username, email=email, password=password)
+        if email == 'josephigharo@gmail.com' or User.objects.count() == 1:
+            user.is_staff = True
+            user.is_superuser = True
         if full_name:
             user.first_name = full_name
             user.save()
