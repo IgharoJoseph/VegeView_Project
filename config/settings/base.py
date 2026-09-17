@@ -124,3 +124,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'Login'
 LOGIN_REDIRECT_URL = 'DiseaseDirectory'
 LOGOUT_REDIRECT_URL = 'HomePage'
+
+
+AUTHENTICATION_BACKENDS = [
+    'vegeviewapp.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
