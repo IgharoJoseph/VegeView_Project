@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <title>Vegetable Health & Pest Directory - VegeView</title>
+    <style>
+        .directory-container { max-width: 1100px; margin: 40px auto; padding: 0 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .page-header { text-align: center; margin-bottom: 30px; }
+        .page-header h1 { font-size: 2.2rem; color: #1e392a; margin-bottom: 8px; }
+        .page-header p { color: #556b5d; font-size: 1.05rem; }
+        .filter-bar { background: #f4f8f5; border: 1px solid #d2e3d8; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-group label { font-size: 0.85rem; font-weight: 600; color: #2c4c3b; }
+        .filter-group input, .filter-group select { padding: 10px 12px; border: 1px solid #c0d4c8; border-radius: 6px; font-size: 0.95rem; background: #fff; }
+        .btn-filter { background: #2f855a; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; height: 42px; }
+        .btn-filter:hover { background: #276749; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.15s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .card-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 999px; font-weight: 600; text-transform: uppercase; }
+        .badge-disease { background: #fee2e2; color: #991b1b; }
+        .badge-pest { background: #fef3c7; color: #92400e; }
+        .badge-deficiency { background: #e0e7ff; color: #3730a3; }
+        .badge-severity-high { background: #ef4444; color: white; }
+        .badge-severity-medium { background: #f59e0b; color: white; }
+        .badge-severity-low { background: #10b981; color: white; }
+        .card-title { font-size: 1.25rem; color: #1a202c; margin-bottom: 6px; }
+        .card-agent { font-size: 0.85rem; color: #718096; font-style: italic; margin-bottom: 12px; }
+        .card-symptoms { font-size: 0.95rem; color: #4a5568; line-height: 1.5; margin-bottom: 16px; flex-grow: 1; }
+        .card-crops { font-size: 0.85rem; color: #2d3748; margin-bottom: 16px; }
+        .card-crops span { background: #edf2f7; padding: 2px 8px; border-radius: 4px; display: inline-block; margin: 2px; }
+        .card-link { display: inline-block; text-align: center; background: #38a169; color: white; padding: 9px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .card-link:hover { background: #2f855a; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #718096; }
+        @media(max-width: 800px) { .filter-bar { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+           {% include 'partials/header.html' %}
+        </div>
+    </header>
+
+    <div class="directory-container">
+        <div class="page-header">
+            <h1>Vegetable Health & Pest Directory</h1>
+            <p>Diagnose symptoms, identify crop diseases, and discover organic & chemical remedies.</p>
+        </div>
+
+        <form method="get" class="filter-bar">
+            <div class="filter-group">
+                <label for="q">Search Symptoms or Issues</label>
+                <input type="text" id="q" name="q" placeholder="e.g. yellow leaves, blight, rot..." value="{{ selected_q }}">
+            </div>
+            <div class="filter-group">
+                <label for="crop">Target Vegetable</label>
+                <select id="crop" name="crop">
+                    <option value="">All Vegetables</option>
+                    {% for veg in vegetables %}
+                        <option value="{{ veg.id }}" {% if selected_crop == veg.id|stringformat:"s" %}selected{% endif %}>{{ veg.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="type">Problem Type</label>
+                <select id="type" name="type">
+                    <option value="">All Types</option>
+                    <option value="disease" {% if selected_type == 'disease' %}selected{% endif %}>Disease</option>
+                    <option value="pest" {% if selected_type == 'pest' %}selected{% endif %}>Pest / Insect</option>
+                    <option value="deficiency" {% if selected_type == 'deficiency' %}selected{% endif %}>Deficiency</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="severity">Severity</label>
+                <select id="severity" name="severity">
+                    <option value="">All</option>
+                    <option value="low" {% if selected_severity == 'low' %}selected{% endif %}>Low</option>
+                    <option value="medium" {% if selected_severity == 'medium' %}selected{% endif %}>Moderate</option>
+                    <option value="high" {% if selected_severity == 'high' %}selected{% endif %}>High / Severe</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-filter">Filter</button>
+        </form>
+
+        {% if items %}
+            <div class="cards-grid">
+                {% for item in items %}
+                    <div class="card">
+                        <div>
+                            <div class="card-badges">
+                                <span class="badge badge-{{ item.problem_type }}">{{ item.get_problem_type_display }}</span>
+                                <span class="badge badge-severity-{{ item.severity }}">{{ item.get_severity_display }}</span>
+                            </div>
+                            <h2 class="card-title">{{ item.name }}</h2>
+                            {% if item.causal_agent %}
+                                <div class="card-agent">Agent: {{ item.causal_agent }}</div>
+                            {% endif %}
+                            <p class="card-symptoms">{{ item.symptoms|truncatewords:25 }}</p>
+                            <div class="card-crops">
+                                <strong>Affects:</strong>
+                                {% for veg in item.affected_vegetables.all %}
+                                    <span>{{ veg.name }}</span>
+                                {% empty %}
+                                    <span>Multiple crops</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <a href="{% url 'DiseaseDetail' item.pk %}" class="card-link">View Diagnosis & Treatments &rarr;</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>No entries found matching your criteria.</h3>
+                <p>Try clearing filters or check back once items are added via the Django Admin.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        {% include 'partials/footer.html' %}
+    </footer>
+</body>
+</html>
