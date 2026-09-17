@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Symptom Checker - VegeView</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <style>
+        .diag-wrapper { max-width: 1100px; margin: 30px auto; padding: 0 20px; font-family: system-ui, -apple-system, sans-serif; color: #1f2937; }
+        .diag-header { text-align: center; margin-bottom: 30px; }
+        .diag-header h1 { font-size: 2.2rem; color: #1e3a2b; margin-bottom: 8px; }
+        .diag-header p { font-size: 1.05rem; color: #4b5563; max-width: 650px; margin: 0 auto; }
+        
+        .diag-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; align-items: start; }
+        @media (max-width: 860px) { .diag-grid { grid-template-columns: 1fr; } }
+
+        .diag-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .step-title { font-size: 1.15rem; font-weight: 700; color: #2e7d32; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: #e8f5e9; color: #2e7d32; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; color: #374151; }
+        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #fafafa; }
+        .form-control:focus { outline: none; border-color: #2e7d32; background: #fff; }
+
+        .part-pills { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+        .part-pill input { display: none; }
+        .part-pill label { display: block; text-align: center; padding: 10px 8px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; background: #f9fafb; }
+        .part-pill input:checked + label { border-color: #2e7d32; background: #e8f5e9; color: #1b5e20; }
+
+        .symptom-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .symptom-tag input { display: none; }
+        .symptom-tag label { display: inline-block; padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 20px; font-size: 0.85rem; cursor: pointer; background: #f9fafb; transition: all 0.2s; }
+        .symptom-tag input:checked + label { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+
+        .btn-diagnose { width: 100%; padding: 14px; background: #2e7d32; color: #ffffff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+        .btn-diagnose:hover { background: #1b5e20; }
+        .btn-reset { display: block; text-align: center; margin-top: 10px; color: #6b7280; font-size: 0.9rem; text-decoration: none; }
+
+        /* Results pane */
+        .result-empty { text-align: center; padding: 40px 20px; color: #6b7280; }
+        .result-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .result-item { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 16px; border-left: 5px solid #2e7d32; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .result-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .result-title { font-size: 1.25rem; font-weight: 700; color: #111827; }
+        .result-sub { font-size: 0.85rem; color: #6b7280; font-style: italic; }
+        
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
+        .badge-high { background: #fee2e2; color: #991b1b; }
+        .badge-medium { background: #fef3c7; color: #92400e; }
+        .badge-low { background: #f3f4f6; color: #4b5563; }
+
+        .match-score { font-size: 0.85rem; font-weight: 600; color: #059669; margin-top: 4px; }
+        .match-reasons { font-size: 0.8rem; color: #4b5563; margin-top: 6px; padding: 6px 10px; background: #f9fafb; border-radius: 6px; }
+
+        .treat-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e5e7eb; font-size: 0.9rem; }
+        .treat-box { margin-top: 8px; padding: 10px; border-radius: 6px; }
+        .treat-org { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+        .treat-chem { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; margin-top: 8px; }
+        .treat-title { font-weight: 700; font-size: 0.82rem; text-transform: uppercase; margin-bottom: 4px; display: block; }
+
+        .btn-view-detail { display: inline-block; margin-top: 10px; font-size: 0.85rem; font-weight: 600; color: #2e7d32; text-decoration: none; }
+        .btn-view-detail:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            {% include 'partials/header.html' %}
+        </div>
+    </header>
+
+    <div class="diag-wrapper">
+        <div class="diag-header">
+            <h1>Vegetable Symptom Checker</h1>
+            <p>Diagnose pests, fungal infections, and nutritional deficiencies in your crops. Select the vegetable and visual symptoms to receive immediate organic and corrective treatments.</p>
+        </div>
+
+        <div class="diag-grid">
+            <!-- Diagnostic Input Form -->
+            <div class="diag-card">
+                <form method="GET" action="{% url 'SymptomChecker' %}">
+                    <div class="step-title"><span class="step-num">1</span> Choose Crop</div>
+                    <div class="form-group">
+                        <select name="crop" class="form-control" required>
+                            <option value="">-- Select Vegetable --</option>
+                            {% for crop in vegetables %}
+                            <option value="{{ crop.id }}" {% if selected_crop == crop.id|stringformat:"i" %}selected{% endif %}>
+                                {{ crop.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="step-title"><span class="step-num">2</span> Affected Plant Part</div>
+                    <div class="form-group">
+                        <div class="part-pills">
+                            <div class="part-pill">
+                                <input type="radio" id="part_leaves" name="part" value="leaves" {% if selected_part == 'leaves' or not selected_part %}checked{% endif %}>
+                                <label for="part_leaves">🍃 Leaves</label>
+                            </div>
+                            <div class="part-pill">
+                                <input type="radio" id="part_fruit" name="part" value="fruit" {% if selected_part == 'fruit' %}checked{% endif %}>
+                                <label for="part_fruit">🍅 Fruit/Pod</label>
+                            </div>
+                            <div class="part-pill">
+                                <input type="radio" id="part_stem" name="part" value="stem" {% if selected_part == 'stem' %}checked{% endif %}>
+                                <label for="part_stem">🌿 Stem</label>
+                            </div>
+                            <div class="part-pill">
+                                <input type="radio" id="part_roots" name="part" value="roots" {% if selected_part == 'roots' %}checked{% endif %}>
+                                <label for="part_roots">🌱 Roots</label>
+                            </div>
+                            <div class="part-pill">
+                                <input type="radio" id="part_whole" name="part" value="whole" {% if selected_part == 'whole' %}checked{% endif %}>
+                                <label for="part_whole">🪴 Whole</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-title"><span class="step-num">3</span> Observable Signs</div>
+                    <div class="form-group">
+                        <div class="symptom-tags">
+                            {% for tag_val, tag_label in symptom_tags %}
+                            <div class="symptom-tag">
+                                <input type="checkbox" id="sym_{{ tag_val }}" name="symptom" value="{{ tag_val }}" {% if tag_val in selected_symptoms %}checked{% endif %}>
+                                <label for="sym_{{ tag_val }}">{{ tag_label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Additional Visual Notes (optional)</label>
+                        <textarea id="notes" name="notes" rows="2" class="form-control" placeholder="e.g. concentric brown rings with yellow halo on lower leaves">{{ notes }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn-diagnose">🔍 Run Diagnosis</button>
+                    {% if diagnosed %}
+                    <a href="{% url 'SymptomChecker' %}" class="btn-reset">Reset Diagnostic Tool</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Diagnostic Results -->
+            <div class="diag-card">
+                <div class="step-title" style="color: #1e3a2b;">
+                    <span>📊 Diagnostic Results</span>
+                </div>
+
+                {% if diagnosed %}
+                    {% if results %}
+                        <p style="font-size: 0.95rem; color: #4b5563; margin-bottom: 16px;">
+                            Found <strong>{{ results|length }}</strong> potential condition{{ results|length|pluralize }} matching <strong>{{ selected_crop_obj.name|default:"selected crop" }}</strong>:
+                        </p>
+                        {% for res in results %}
+                        <div class="result-item">
+                            <div class="result-top">
+                                <div>
+                                    <div class="result-title">{{ res.item.name }}</div>
+                                    {% if res.item.causal_agent %}
+                                    <div class="result-sub">Cause: {{ res.item.causal_agent }}</div>
+                                    {% endif %}
+                                    <div class="match-score">Match Confidence: {{ res.score }}%</div>
+                                </div>
+                                <span class="badge {{ res.badge_class }}">{{ res.tier }}</span>
+                            </div>
+
+                            <p style="font-size: 0.9rem; color: #374151; margin-top: 6px;">{{ res.item.symptoms }}</p>
+
+                            {% if res.reasons %}
+                            <div class="match-reasons">
+                                <strong>Why this matched:</strong> {{ res.reasons|join:" • " }}
+                            </div>
+                            {% endif %}
+
+                            <div class="treat-section">
+                                {% if res.item.organic_treatment %}
+                                <div class="treat-box treat-org">
+                                    <span class="treat-title">🌿 Organic & Cultural Control:</span>
+                                    {{ res.item.organic_treatment }}
+                                </div>
+                                {% endif %}
+                                {% if res.item.chemical_treatment %}
+                                <div class="treat-box treat-chem">
+                                    <span class="treat-title">🧪 Chemical Remedy (if severe):</span>
+                                    {{ res.item.chemical_treatment }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <a href="{% url 'DiseaseDetail' res.item.id %}" class="btn-view-detail">View full disease profile & prevention tips &rarr;</a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="result-empty">
+                            <div class="result-empty-icon">🌱</div>
+                            <h3>No Exact Matches Found</h3>
+                            <p>Try unchecking some symptom filters or selecting a broader plant part to see related conditions.</p>
+                            <a href="{% url 'DiseaseDirectory' %}" class="btn-view-detail" style="margin-top: 15px;">Browse all cataloged diseases &rarr;</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="result-empty">
+                        <div class="result-empty-icon">🔬</div>
+                        <h3>Ready for Diagnosis</h3>
+                        <p>Fill out the 3 steps on the left and click <strong>Run Diagnosis</strong> to identify the issue and see specific treatment steps.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
