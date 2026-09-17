@@ -1,0 +1,571 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Health Map & NDVI Monitor - VegeView</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --surface: #ffffff;
+            --surface-muted: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08);
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-page-wrapper {
+            max-width: 1380px;
+            width: 100%;
+            margin: 24px auto 40px auto;
+            padding: 0 24px;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+
+        /* Top Stat Metric Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .stat-label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        /* Map and Side Panel Layout */
+        .gis-container {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 20px;
+            align-items: start;
+        }
+        @media (max-width: 1024px) {
+            .gis-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .map-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-toolbar {
+            padding: 14px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .map-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #fieldMap {
+            height: 580px;
+            width: 100%;
+            background: #e2e8f0;
+        }
+
+        /* NDVI Spectrum Legend */
+        .ndvi-legend {
+            padding: 12px 20px;
+            background: #ffffff;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .ndvi-bar {
+            flex-grow: 1;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #ef4444 0%, #f97316 25%, #eab308 50%, #84cc16 75%, #15803d 100%);
+            margin: 0 12px;
+            min-width: 140px;
+        }
+
+        /* Side Panel */
+        .sidebar-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: var(--shadow-md);
+        }
+        .sidebar-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-head h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .btn-add-plot {
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-add-plot:hover {
+            background: var(--primary-hover);
+        }
+
+        .fields-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .field-item {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            background: var(--surface-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .field-item:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+        .field-item.active {
+            border-color: var(--primary);
+            background: #f0fdf4;
+            box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
+        }
+        .field-name {
+            font-weight: 700;
+            font-size: 0.96rem;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+        .field-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .field-health-badge {
+            display: inline-block;
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        .badge-green { background: #dcfce7; color: #15803d; }
+        .badge-yellow { background: #fef3c7; color: #92400e; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+
+        /* Modal Dialog */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open {
+            display: flex;
+        }
+        .modal-box {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .modal-header h3 { margin: 0; font-size: 1.2rem; }
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .form-row {
+            margin-bottom: 14px;
+        }
+        .form-row label {
+            display: block;
+            font-size: 0.86rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.92rem;
+            box-sizing: border-box;
+            background: #f8fafc;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-submit-modal {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-cancel-modal {
+            background: #f1f5f9;
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        {% include 'partials/header.html' %}
+    </header>
+
+    <div class="map-page-wrapper">
+        <!-- Summary Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Total Managed Land</div>
+                    <div class="stat-value">{{ total_area|floatformat:1 }} <span style="font-size: 1rem; font-weight: 600; color: #64748b;">Hectares</span></div>
+                </div>
+                <div class="stat-icon" style="background: #f0fdf4; color: #15803d;">🚜</div>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Average NDVI Index</div>
+                    <div class="stat-value">{{ avg_ndvi }} <span style="font-size: 1rem; font-weight: 600; color: #15803d;">Score</span></div>
+                </div>
+                <div class="stat-icon" style="background: #ecfdf5; color: #059669;">📡</div>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Vigorous Crop Zones</div>
+                    <div class="stat-value">{{ vigorous_count }} <span style="font-size: 1rem; font-weight: 600; color: #16a34a;">Plots</span></div>
+                </div>
+                <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">🌿</div>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Attention / Stressed</div>
+                    <div class="stat-value" style="color: {% if attention_count > 0 %}#dc2626{% else %}#15803d{% endif %};">
+                        {{ attention_count }} <span style="font-size: 1rem; font-weight: 600; color: #64748b;">Plots</span>
+                    </div>
+                </div>
+                <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">⚠️</div>
+            </div>
+        </div>
+
+        <!-- Main GIS Map + Sidebar -->
+        <div class="gis-container">
+            <div class="map-card">
+                <div class="map-toolbar">
+                    <h2 class="map-title">
+                        <span>🗺️ Field Vegetation Map</span>
+                    </h2>
+                    <span style="font-size: 0.85rem; color: #64748b;">Real-time NDVI vegetation density and health alerts</span>
+                </div>
+
+                <div id="fieldMap"></div>
+
+                <div class="ndvi-legend">
+                    <span>NDVI Index:</span>
+                    <span>0.0 Bare / Stressed</span>
+                    <div class="ndvi-bar"></div>
+                    <span>1.0 Dense / Vigorous Canopy</span>
+                </div>
+            </div>
+
+            <!-- Field Sidebar -->
+            <div class="sidebar-card">
+                <div class="sidebar-head">
+                    <h3>My Field Plots ({{ fields|length }})</h3>
+                    <button class="btn-add-plot" id="openAddModalBtn">+ Add Plot</button>
+                </div>
+
+                <div class="fields-list">
+                    {% for f in fields %}
+                    <div class="field-item" onclick="focusField({{ f.latitude }}, {{ f.longitude }}, '{{ f.name|escapejs }}', {{ f.current_ndvi }}, '{{ f.get_health_status_display|escapejs }}')">
+                        <div class="field-name">{{ f.name }}</div>
+                        <div class="field-meta">
+                            <span>🌱 {{ f.crop.name|default:"Mixed" }}</span>
+                            <span>•</span>
+                            <span>📐 {{ f.area_hectares }} Ha</span>
+                            <span>•</span>
+                            <span>💧 {{ f.irrigation_system }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                            <span class="field-health-badge {% if f.health_status == 'vigorous' %}badge-green{% elif f.health_status == 'moderate' %}badge-yellow{% else %}badge-red{% endif %}">
+                                {{ f.get_health_status_display }}
+                            </span>
+                            <span style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">{{ f.current_ndvi }} NDVI</span>
+                        </div>
+                        {% if f.health_status in 'stressed critical' %}
+                        <div style="margin-top: 8px; padding-top: 6px; border-top: 1px dashed #fca5a5;">
+                            <a href="{% url 'SymptomChecker' %}" style="font-size: 0.78rem; font-weight: 700; color: #dc2626; text-decoration: none;">
+                                ⚠️ Stress detected: Run symptom check &rarr;
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding plot -->
+    <div class="modal-overlay" id="addPlotModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Add New Farm Field Plot</h3>
+                <button class="btn-close-modal" id="closeAddModalBtn">&times;</button>
+            </div>
+            <form method="POST" action="{% url 'FieldMap' %}">
+                {% csrf_token %}
+                <div class="form-row">
+                    <label for="plotName">Plot Name</label>
+                    <input type="text" id="plotName" name="name" class="form-input" placeholder="e.g. South Terrace - Sweet Potatoes" required>
+                </div>
+                <div class="form-row">
+                    <label for="plotCrop">Planted Vegetable</label>
+                    <select id="plotCrop" name="crop" class="form-input">
+                        <option value="">-- Choose Crop --</option>
+                        {% for veg in vegetables %}
+                        <option value="{{ veg.id }}">{{ veg.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-row">
+                        <label for="plotArea">Area (Hectares)</label>
+                        <input type="number" step="0.1" id="plotArea" name="area" class="form-input" value="1.5" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="plotNdvi">Est. NDVI Score (0.0 to 1.0)</label>
+                        <input type="number" step="0.01" min="0.0" max="1.0" id="plotNdvi" name="ndvi" class="form-input" value="0.75" required>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-row">
+                        <label for="plotLat">Latitude</label>
+                        <input type="number" step="0.0001" id="plotLat" name="latitude" class="form-input" value="9.0820" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="plotLng">Longitude</label>
+                        <input type="number" step="0.0001" id="plotLng" name="longitude" class="form-input" value="8.6753" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label for="plotIrrig">Irrigation Method</label>
+                    <input type="text" id="plotIrrig" name="irrigation" class="form-input" value="Drip Irrigation">
+                </div>
+                <div class="form-row">
+                    <label for="plotNotes">Notes</label>
+                    <textarea id="plotNotes" name="notes" rows="2" class="form-input" placeholder="Field soil condition, planting schedule..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel-modal" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="btn-submit-modal">Save Plot to Map</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        var fieldsData = {{ fields_json|safe }};
+        var map = L.map('fieldMap').setView([9.083, 8.676], 14);
+
+        // Standard and satellite tile layers
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri'
+        });
+
+        var baseMaps = {
+            "OpenStreetMap": osmLayer,
+            "Satellite Imagery": satelliteLayer
+        };
+        L.control.layers(baseMaps).addTo(map);
+
+        var markers = [];
+
+        // Plot each field with color-coded NDVI circle overlay
+        fieldsData.forEach(function(f) {
+            var circle = L.circle([f.lat, f.lng], {
+                color: f.color,
+                fillColor: f.color,
+                fillOpacity: 0.35,
+                radius: Math.sqrt(f.area * 10000 / Math.PI) * 1.4
+            }).addTo(map);
+
+            var popupContent = `
+                <div style="font-family: inherit; min-width: 190px;">
+                    <div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${f.name}</div>
+                    <div style="color: #64748b; font-size: 0.85rem; margin-bottom: 8px;">Crop: <strong>${f.crop}</strong> (${f.area} Ha)</div>
+                    <div style="background: ${f.color}20; color: ${f.color}; font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; display: inline-block;">
+                        ${f.ndvi} NDVI - ${f.health_display}
+                    </div>
+                    <div style="font-size: 0.82rem; color: #475569; margin-top: 8px;">💧 ${f.irrigation}</div>
+                    ${f.notes ? `<div style="font-size: 0.8rem; color: #64748b; margin-top: 4px; font-style: italic;">"${f.notes}"</div>` : ''}
+                </div>
+            `;
+            circle.bindPopup(popupContent);
+            markers.push(circle);
+        });
+
+        // Fit map bounds to show all plots
+        if (markers.length > 0) {
+            var group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.2));
+        }
+
+        function focusField(lat, lng, name, ndvi, health) {
+            map.setView([lat, lng], 15, { animate: true });
+        }
+
+        // Modal Controls
+        var modal = document.getElementById('addPlotModal');
+        document.getElementById('openAddModalBtn').onclick = function() { modal.classList.add('open'); };
+        document.getElementById('closeAddModalBtn').onclick = function() { modal.classList.remove('open'); };
+        document.getElementById('cancelModalBtn').onclick = function() { modal.classList.remove('open'); };
+
+        // Click map to drop coordinates
+        map.on('click', function(e) {
+            document.getElementById('plotLat').value = e.latlng.lat.toFixed(4);
+            document.getElementById('plotLng').value = e.latlng.lng.toFixed(4);
+        });
+    </script>
+
+    <footer class="footer">
+        {% include 'partials/footer.html' %}
+    </footer>
+</body>
+</html>
