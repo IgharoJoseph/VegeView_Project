@@ -194,9 +194,11 @@
     <nav class="vv-nav" id="vvNav">
         <a href="{% url 'HomePage' %}" class="vv-nav-link">Home</a>
         {% if user.is_authenticated %}
+            <a href="{% url 'FieldMap' %}" class="vv-nav-link {% if request.resolver_match.url_name == 'FieldMap' %}active-link{% endif %}">Field Map</a>
             <a href="{% url 'SymptomChecker' %}" class="vv-nav-link {% if request.resolver_match.url_name == 'SymptomChecker' %}active-link{% endif %}">Symptom Checker</a>
             <a href="{% url 'DiseaseDirectory' %}" class="vv-nav-link {% if request.resolver_match.url_name == 'DiseaseDirectory' or request.resolver_match.url_name == 'DiseaseDetail' %}active-link{% endif %}">Disease Directory</a>
         {% else %}
+            <a href="{% url 'Login' %}?next={% url 'FieldMap' %}" class="vv-nav-link">Field Map</a>
             <a href="{% url 'Login' %}?next={% url 'SymptomChecker' %}" class="vv-nav-link">Symptom Checker</a>
             <a href="{% url 'Login' %}?next={% url 'DiseaseDirectory' %}" class="vv-nav-link">Disease Directory</a>
         {% endif %}
