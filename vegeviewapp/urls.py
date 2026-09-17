@@ -8,5 +8,6 @@ urlpatterns = [
     path('directory/<int:pk>/', views.disease_detail, name="DiseaseDetail"),
     path('signup', views.signup, name="Signup"),
     path('login', views.login, name="Login"),
+    path('logout', views.logout_view, name="Logout"),
     path('forgotpassword', views.forgotpassword, name="Forgot_Password"),
 ]
