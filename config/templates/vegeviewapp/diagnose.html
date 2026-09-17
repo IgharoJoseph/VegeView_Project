@@ -4,87 +4,549 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Symptom Checker - VegeView</title>
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <title>Crop Symptom Checker & Disease Diagnostic - VegeView</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
     <style>
-        .diag-wrapper { max-width: 1100px; margin: 30px auto; padding: 0 20px; font-family: system-ui, -apple-system, sans-serif; color: #1f2937; }
-        .diag-header { text-align: center; margin-bottom: 30px; }
-        .diag-header h1 { font-size: 2.2rem; color: #1e3a2b; margin-bottom: 8px; }
-        .diag-header p { font-size: 1.05rem; color: #4b5563; max-width: 650px; margin: 0 auto; }
-        
-        .diag-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 30px; align-items: start; }
-        @media (max-width: 860px) { .diag-grid { grid-template-columns: 1fr; } }
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --primary-light: #f0fdf4;
+            --surface: #ffffff;
+            --surface-muted: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
 
-        .diag-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .step-title { font-size: 1.15rem; font-weight: 700; color: #2e7d32; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-        .step-num { width: 28px; height: 28px; border-radius: 50%; background: #e8f5e9; color: #2e7d32; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; color: #374151; }
-        .form-control { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; background: #fafafa; }
-        .form-control:focus { outline: none; border-color: #2e7d32; background: #fff; }
+        .diag-wrapper {
+            max-width: 1240px;
+            width: 100%;
+            margin: 28px auto 48px auto;
+            padding: 0 24px;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
 
-        .part-pills { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
-        .part-pill input { display: none; }
-        .part-pill label { display: block; text-align: center; padding: 10px 8px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; background: #f9fafb; }
-        .part-pill input:checked + label { border-color: #2e7d32; background: #e8f5e9; color: #1b5e20; }
+        .diag-hero {
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+            border-radius: var(--radius-lg);
+            padding: 32px 36px;
+            margin-bottom: 28px;
+            color: #ffffff;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+        .diag-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .diag-hero h1 {
+            font-size: 2.1rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .diag-hero p {
+            font-size: 1.05rem;
+            color: #d1fae5;
+            margin: 0;
+            max-width: 680px;
+            line-height: 1.5;
+        }
 
-        .symptom-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-        .symptom-tag input { display: none; }
-        .symptom-tag label { display: inline-block; padding: 7px 12px; border: 1px solid #d1d5db; border-radius: 20px; font-size: 0.85rem; cursor: pointer; background: #f9fafb; transition: all 0.2s; }
-        .symptom-tag input:checked + label { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+        .diag-grid {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+        @media (max-width: 980px) {
+            .diag-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
-        .btn-diagnose { width: 100%; padding: 14px; background: #2e7d32; color: #ffffff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-        .btn-diagnose:hover { background: #1b5e20; }
-        .btn-reset { display: block; text-align: center; margin-top: 10px; color: #6b7280; font-size: 0.9rem; text-decoration: none; }
+        .card-studio {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+        }
+        .card-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 18px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-header-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
 
-        /* Results pane */
-        .result-empty { text-align: center; padding: 40px 20px; color: #6b7280; }
-        .result-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
-        .result-item { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; margin-bottom: 16px; border-left: 5px solid #2e7d32; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-        .result-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .result-title { font-size: 1.25rem; font-weight: 700; color: #111827; }
-        .result-sub { font-size: 0.85rem; color: #6b7280; font-style: italic; }
-        
-        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
-        .badge-high { background: #fee2e2; color: #991b1b; }
-        .badge-medium { background: #fef3c7; color: #92400e; }
-        .badge-low { background: #f3f4f6; color: #4b5563; }
+        .step-block { margin-bottom: 24px; }
+        .step-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .step-pill {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: #15803d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
 
-        .match-score { font-size: 0.85rem; font-weight: 600; color: #059669; margin-top: 4px; }
-        .match-reasons { font-size: 0.8rem; color: #4b5563; margin-top: 6px; padding: 6px 10px; background: #f9fafb; border-radius: 6px; }
+        .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: var(--surface-muted);
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        .form-select:focus {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+        }
 
-        .treat-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e5e7eb; font-size: 0.9rem; }
-        .treat-box { margin-top: 8px; padding: 10px; border-radius: 6px; }
-        .treat-org { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
-        .treat-chem { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; margin-top: 8px; }
-        .treat-title { font-weight: 700; font-size: 0.82rem; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .plant-parts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+            gap: 8px;
+        }
+        .plant-part-option input { display: none; }
+        .plant-part-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 6px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            background-color: var(--surface-muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            user-select: none;
+        }
+        .plant-part-option label .part-emoji {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+        .plant-part-option label:hover {
+            border-color: #cbd5e1;
+            background-color: #ffffff;
+        }
+        .plant-part-option input:checked + label {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.1);
+        }
 
-        .btn-view-detail { display: inline-block; margin-top: 10px; font-size: 0.85rem; font-weight: 600; color: #2e7d32; text-decoration: none; }
-        .btn-view-detail:hover { text-decoration: underline; }
+        .symptoms-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .symptom-chip input { display: none; }
+        .symptom-chip label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 24px;
+            background: var(--surface-muted);
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .symptom-chip label:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+            color: var(--text-main);
+        }
+        .symptom-chip input:checked + label {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(21, 128, 61, 0.25);
+        }
+        .symptom-chip input:checked + label::before {
+            content: "✓";
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.92rem;
+            font-family: inherit;
+            color: var(--text-main);
+            background: var(--surface-muted);
+            outline: none;
+            transition: all 0.2s ease;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .form-textarea:focus {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+        }
+
+        .btn-diagnose {
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.3);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-diagnose:hover {
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+            transform: translateY(-1px);
+        }
+        .btn-reset-link {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            color: var(--text-light);
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-reset-link:hover {
+            color: var(--text-main);
+            text-decoration: underline;
+        }
+
+        .results-lead {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+        .results-lead strong { color: var(--text-main); }
+
+        .match-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        .match-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 5px;
+            background: #16a34a;
+        }
+
+        .match-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .match-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 4px 0;
+        }
+        .match-causal {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .badges-cluster {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .pill-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+
+        .confidence-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0 16px 0;
+            background: var(--surface-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+        }
+        .confidence-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            min-width: 130px;
+        }
+        .confidence-track {
+            flex-grow: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #16a34a, #22c55e);
+            border-radius: 4px;
+        }
+        .confidence-pct {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #15803d;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .symptoms-observed-text {
+            font-size: 0.93rem;
+            line-height: 1.55;
+            color: #334155;
+            margin-bottom: 14px;
+        }
+
+        .matched-reasons-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: #166534;
+            margin-bottom: 16px;
+        }
+
+        .remedy-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .remedy-box {
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .remedy-organic {
+            background: #f0fdf4;
+            border: 1.5px solid #86efac;
+            color: #14532d;
+        }
+        .remedy-chemical {
+            background: #fffbeb;
+            border: 1.5px solid #fcd34d;
+            color: #78350f;
+        }
+        .remedy-head {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .remedy-organic .remedy-head { color: #166534; }
+        .remedy-chemical .remedy-head { color: #92400e; }
+
+        .btn-detail-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.92rem;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+        .btn-detail-link:hover { text-decoration: underline; }
+
+        .state-empty {
+            text-align: center;
+            padding: 56px 24px;
+            color: var(--text-light);
+        }
+        .state-empty-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        .state-empty h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 8px 0;
+        }
+        .state-empty p {
+            max-width: 440px;
+            margin: 0 auto;
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .diag-wrapper {
+                margin: 16px auto;
+                padding: 0 16px;
+            }
+            .diag-hero {
+                padding: 24px 20px;
+            }
+            .diag-hero h1 {
+                font-size: 1.6rem;
+            }
+            .card-studio {
+                padding: 20px;
+            }
+            .match-top-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
     <header class="header">
-        <div class="header-left">
-            {% include 'partials/header.html' %}
-        </div>
+        {% include 'partials/header.html' %}
     </header>
 
     <div class="diag-wrapper">
-        <div class="diag-header">
-            <h1>Vegetable Symptom Checker</h1>
-            <p>Diagnose pests, fungal infections, and nutritional deficiencies in your crops. Select the vegetable and visual symptoms to receive immediate organic and corrective treatments.</p>
-        </div>
+        <section class="diag-hero">
+            <div class="diag-hero-badge">🌱 VegeView Crop Doctor</div>
+            <h1>Interactive Crop Symptom Checker</h1>
+            <p>Select your vegetable and observed plant symptoms to pinpoint diseases, fungal infections, or nutrient deficiencies, with immediate organic & corrective remedies.</p>
+        </section>
 
         <div class="diag-grid">
-            <!-- Diagnostic Input Form -->
-            <div class="diag-card">
+            <div class="card-studio">
+                <div class="card-header-bar">
+                    <h2 class="card-header-title">
+                        <span>🧪 Diagnostic Studio</span>
+                    </h2>
+                </div>
+
                 <form method="GET" action="{% url 'SymptomChecker' %}">
-                    <div class="step-title"><span class="step-num">1</span> Choose Crop</div>
-                    <div class="form-group">
-                        <select name="crop" class="form-control" required>
-                            <option value="">-- Select Vegetable --</option>
+                    <div class="step-block">
+                        <label class="step-label" for="cropSelect">
+                            <span class="step-pill">1</span>
+                            Target Crop / Vegetable
+                        </label>
+                        <select id="cropSelect" name="crop" class="form-select" required>
+                            <option value="">-- Choose Vegetable --</option>
                             {% for crop in vegetables %}
                             <option value="{{ crop.id }}" {% if selected_crop == crop.id|stringformat:"i" %}selected{% endif %}>
                                 {{ crop.name }}
@@ -93,37 +555,58 @@
                         </select>
                     </div>
 
-                    <div class="step-title"><span class="step-num">2</span> Affected Plant Part</div>
-                    <div class="form-group">
-                        <div class="part-pills">
-                            <div class="part-pill">
+                    <div class="step-block">
+                        <div class="step-label">
+                            <span class="step-pill">2</span>
+                            Affected Plant Area
+                        </div>
+                        <div class="plant-parts-grid">
+                            <div class="plant-part-option">
                                 <input type="radio" id="part_leaves" name="part" value="leaves" {% if selected_part == 'leaves' or not selected_part %}checked{% endif %}>
-                                <label for="part_leaves">🍃 Leaves</label>
+                                <label for="part_leaves">
+                                    <span class="part-emoji">🍃</span>
+                                    <span>Leaves</span>
+                                </label>
                             </div>
-                            <div class="part-pill">
+                            <div class="plant-part-option">
                                 <input type="radio" id="part_fruit" name="part" value="fruit" {% if selected_part == 'fruit' %}checked{% endif %}>
-                                <label for="part_fruit">🍅 Fruit/Pod</label>
+                                <label for="part_fruit">
+                                    <span class="part-emoji">🍅</span>
+                                    <span>Fruit/Pod</span>
+                                </label>
                             </div>
-                            <div class="part-pill">
+                            <div class="plant-part-option">
                                 <input type="radio" id="part_stem" name="part" value="stem" {% if selected_part == 'stem' %}checked{% endif %}>
-                                <label for="part_stem">🌿 Stem</label>
+                                <label for="part_stem">
+                                    <span class="part-emoji">🎋</span>
+                                    <span>Stem</span>
+                                </label>
                             </div>
-                            <div class="part-pill">
+                            <div class="plant-part-option">
                                 <input type="radio" id="part_roots" name="part" value="roots" {% if selected_part == 'roots' %}checked{% endif %}>
-                                <label for="part_roots">🌱 Roots</label>
+                                <label for="part_roots">
+                                    <span class="part-emoji">🥕</span>
+                                    <span>Roots</span>
+                                </label>
                             </div>
-                            <div class="part-pill">
+                            <div class="plant-part-option">
                                 <input type="radio" id="part_whole" name="part" value="whole" {% if selected_part == 'whole' %}checked{% endif %}>
-                                <label for="part_whole">🪴 Whole</label>
+                                <label for="part_whole">
+                                    <span class="part-emoji">🪴</span>
+                                    <span>Whole</span>
+                                </label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="step-title"><span class="step-num">3</span> Observable Signs</div>
-                    <div class="form-group">
-                        <div class="symptom-tags">
+                    <div class="step-block">
+                        <div class="step-label">
+                            <span class="step-pill">3</span>
+                            Observed Symptoms
+                        </div>
+                        <div class="symptoms-cloud">
                             {% for tag_val, tag_label in symptom_tags %}
-                            <div class="symptom-tag">
+                            <div class="symptom-chip">
                                 <input type="checkbox" id="sym_{{ tag_val }}" name="symptom" value="{{ tag_val }}" {% if tag_val in selected_symptoms %}checked{% endif %}>
                                 <label for="sym_{{ tag_val }}">{{ tag_label }}</label>
                             </div>
@@ -131,85 +614,128 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="notes">Additional Visual Notes (optional)</label>
-                        <textarea id="notes" name="notes" rows="2" class="form-control" placeholder="e.g. concentric brown rings with yellow halo on lower leaves">{{ notes }}</textarea>
+                    <div class="step-block">
+                        <label class="step-label" for="notes">
+                            <span>Field Notes (Optional)</span>
+                        </label>
+                        <textarea id="notes" name="notes" rows="2" class="form-textarea" placeholder="e.g. concentric brown rings with yellow halo on lower older leaves...">{{ notes }}</textarea>
                     </div>
 
-                    <button type="submit" class="btn-diagnose">🔍 Run Diagnosis</button>
+                    <button type="submit" class="btn-diagnose">
+                        🔍 Run Diagnosis
+                    </button>
                     {% if diagnosed %}
-                    <a href="{% url 'SymptomChecker' %}" class="btn-reset">Reset Diagnostic Tool</a>
+                    <a href="{% url 'SymptomChecker' %}" class="btn-reset-link">Reset Diagnostic Parameters</a>
                     {% endif %}
                 </form>
             </div>
 
-            <!-- Diagnostic Results -->
-            <div class="diag-card">
-                <div class="step-title" style="color: #1e3a2b;">
-                    <span>📊 Diagnostic Results</span>
+            <div class="card-studio">
+                <div class="card-header-bar">
+                    <h2 class="card-header-title">
+                        <span>📋 Diagnostic Assessment</span>
+                    </h2>
+                    {% if diagnosed and results %}
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #15803d; background: #dcfce7; padding: 4px 10px; border-radius: 12px;">
+                        {{ results|length }} Condition{{ results|length|pluralize }}
+                    </span>
+                    {% endif %}
                 </div>
 
                 {% if diagnosed %}
                     {% if results %}
-                        <p style="font-size: 0.95rem; color: #4b5563; margin-bottom: 16px;">
-                            Found <strong>{{ results|length }}</strong> potential condition{{ results|length|pluralize }} matching <strong>{{ selected_crop_obj.name|default:"selected crop" }}</strong>:
-                        </p>
+                        <div class="results-lead">
+                            <span>Evaluated for: <strong>{{ selected_crop_obj.name|default:"Selected Crop" }}</strong></span>
+                            <span>Target: <strong>{{ selected_part|title }}</strong></span>
+                        </div>
+
                         {% for res in results %}
-                        <div class="result-item">
-                            <div class="result-top">
+                        <div class="match-card">
+                            <div class="match-top-row">
                                 <div>
-                                    <div class="result-title">{{ res.item.name }}</div>
+                                    <h3 class="match-title">{{ res.item.name }}</h3>
                                     {% if res.item.causal_agent %}
-                                    <div class="result-sub">Cause: {{ res.item.causal_agent }}</div>
+                                    <div class="match-causal">Cause: {{ res.item.causal_agent }}</div>
                                     {% endif %}
-                                    <div class="match-score">Match Confidence: {{ res.score }}%</div>
                                 </div>
-                                <span class="badge {{ res.badge_class }}">{{ res.tier }}</span>
+                                <div class="badges-cluster">
+                                    <span class="pill-badge {% if res.tier == 'High' %}badge-danger{% elif res.tier == 'Moderate' %}badge-warning{% else %}badge-info{% endif %}">
+                                        {{ res.tier }} Match
+                                    </span>
+                                    <span class="pill-badge {% if res.item.severity == 'high' %}badge-danger{% elif res.item.severity == 'medium' %}badge-warning{% else %}badge-info{% endif %}">
+                                        {{ res.item.get_severity_display }} Severity
+                                    </span>
+                                </div>
                             </div>
 
-                            <p style="font-size: 0.9rem; color: #374151; margin-top: 6px;">{{ res.item.symptoms }}</p>
+                            <div class="confidence-row">
+                                <span class="confidence-label">Diagnostic Match:</span>
+                                <div class="confidence-track">
+                                    <div class="confidence-fill" style="width: {{ res.score }}%;"></div>
+                                </div>
+                                <span class="confidence-pct">{{ res.score }}%</span>
+                            </div>
+
+                            <div class="symptoms-observed-text">
+                                <strong>Typical Symptoms:</strong> {{ res.item.symptoms }}
+                            </div>
 
                             {% if res.reasons %}
-                            <div class="match-reasons">
+                            <div class="matched-reasons-box">
                                 <strong>Why this matched:</strong> {{ res.reasons|join:" • " }}
                             </div>
                             {% endif %}
 
-                            <div class="treat-section">
+                            <div class="remedy-grid">
                                 {% if res.item.organic_treatment %}
-                                <div class="treat-box treat-org">
-                                    <span class="treat-title">🌿 Organic & Cultural Control:</span>
-                                    {{ res.item.organic_treatment }}
+                                <div class="remedy-box remedy-organic">
+                                    <div class="remedy-head">
+                                        <span>🌿</span> Organic & Cultural Control
+                                    </div>
+                                    <div>{{ res.item.organic_treatment }}</div>
                                 </div>
                                 {% endif %}
+
                                 {% if res.item.chemical_treatment %}
-                                <div class="treat-box treat-chem">
-                                    <span class="treat-title">🧪 Chemical Remedy (if severe):</span>
-                                    {{ res.item.chemical_treatment }}
+                                <div class="remedy-box remedy-chemical">
+                                    <div class="remedy-head">
+                                        <span>🧪</span> Chemical Remedy (If Severe)
+                                    </div>
+                                    <div>{{ res.item.chemical_treatment }}</div>
                                 </div>
                                 {% endif %}
                             </div>
 
-                            <a href="{% url 'DiseaseDetail' res.item.id %}" class="btn-view-detail">View full disease profile & prevention tips &rarr;</a>
+                            <a href="{% url 'DiseaseDetail' res.item.id %}" class="btn-detail-link">
+                                Read full prevention protocol & details &rarr;
+                            </a>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <div class="result-empty">
-                            <div class="result-empty-icon">🌱</div>
+                        <div class="state-empty">
+                            <div class="state-empty-icon">🌱</div>
                             <h3>No Exact Matches Found</h3>
-                            <p>Try unchecking some symptom filters or selecting a broader plant part to see related conditions.</p>
-                            <a href="{% url 'DiseaseDirectory' %}" class="btn-view-detail" style="margin-top: 15px;">Browse all cataloged diseases &rarr;</a>
+                            <p>We couldn't match any condition to those exact symptoms on this plant part. Try selecting fewer filters or a broader plant area.</p>
+                            <div style="margin-top: 20px;">
+                                <a href="{% url 'DiseaseDirectory' %}" class="btn-detail-link" style="font-size: 1rem;">
+                                    Browse All Vegetables in the Disease Directory &rarr;
+                                </a>
+                            </div>
                         </div>
                     {% endif %}
                 {% else %}
-                    <div class="result-empty">
-                        <div class="result-empty-icon">🔬</div>
-                        <h3>Ready for Diagnosis</h3>
-                        <p>Fill out the 3 steps on the left and click <strong>Run Diagnosis</strong> to identify the issue and see specific treatment steps.</p>
+                    <div class="state-empty">
+                        <div class="state-empty-icon">🩺</div>
+                        <h3>Diagnostic System Ready</h3>
+                        <p>Select your vegetable crop, choose the affected plant part, and check off any visible signs in the studio on the left. Click <strong>Run Diagnosis</strong> to identify the issue.</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    <footer class="footer">
+        {% include 'partials/footer.html' %}
+    </footer>
 </body>
 </html>
