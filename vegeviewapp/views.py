@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from .models import Vegetable, PestDisease
+from .models import Vegetable, PestDisease, FarmField
 
 
 def index(request):
@@ -278,3 +278,119 @@ def logout_view(request):
 
 def forgotpassword(request):
     return render(request, 'vegeviewapp/forgotpassword.html')
+
+
+@login_required(login_url='Login')
+def field_map_view(request):
+    """Interactive Field Map and Vegetation NDVI health monitor."""
+    # Ensure demo fields exist if the user has none yet
+    user_fields = FarmField.objects.filter(user=request.user).select_related('crop')
+    if not user_fields.exists():
+        tomato = Vegetable.objects.filter(name__icontains='Tomato').first()
+        pepper = Vegetable.objects.filter(name__icontains='Pepper').first()
+        cucumber = Vegetable.objects.filter(name__icontains='Cucumber').first()
+
+        # Seed 3 realistic demo plots
+        FarmField.objects.create(
+            user=request.user,
+            name="Block A - Roma Tomatoes (North)",
+            crop=tomato,
+            area_hectares=2.4,
+            latitude=9.0850,
+            longitude=8.6780,
+            current_ndvi=0.78,
+            health_status='vigorous',
+            irrigation_system='Solar Drip Lines',
+            notes='Canopy closure reached. Excellent vigorous vegetative index.'
+        )
+        FarmField.objects.create(
+            user=request.user,
+            name="Block B - Bell Peppers (Valley)",
+            crop=pepper,
+            area_hectares=1.8,
+            latitude=9.0790,
+            longitude=8.6720,
+            current_ndvi=0.58,
+            health_status='moderate',
+            irrigation_system='Overhead Sprinklers',
+            notes='Flowering stage. Slight moisture deficit detected along the western corner.'
+        )
+        FarmField.objects.create(
+            user=request.user,
+            name="Block C - Cucumbers (East Plot)",
+            crop=cucumber,
+            area_hectares=1.2,
+            latitude=9.0880,
+            longitude=8.6820,
+            current_ndvi=0.38,
+            health_status='stressed',
+            irrigation_system='Furrow Irrigation',
+            notes='Symptom alert: Chlorosis and stunted growth observed on early vine shoots.'
+        )
+        user_fields = FarmField.objects.filter(user=request.user).select_related('crop')
+
+    # Handle adding a new field
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        crop_id = request.POST.get('crop')
+        area = request.POST.get('area', 1.0)
+        lat = request.POST.get('latitude', 9.0820)
+        lng = request.POST.get('longitude', 8.6753)
+        ndvi = float(request.POST.get('ndvi', 0.72))
+        irrigation = request.POST.get('irrigation', 'Drip')
+        notes = request.POST.get('notes', '').strip()
+
+        crop_obj = Vegetable.objects.filter(pk=crop_id).first() if crop_id else None
+
+        field = FarmField(
+            user=request.user,
+            name=name or "New Plot",
+            crop=crop_obj,
+            area_hectares=float(area) if area else 1.0,
+            latitude=float(lat) if lat else 9.0820,
+            longitude=float(lng) if lng else 8.6753,
+            current_ndvi=ndvi,
+            irrigation_system=irrigation,
+            notes=notes
+        )
+        field.update_health_status()
+        field.save()
+        messages.success(request, f"Plot '{field.name}' added to Field Health Map.")
+        return redirect('FieldMap')
+
+    # Calculate summary metrics
+    total_area = sum(f.area_hectares for f in user_fields)
+    avg_ndvi = (sum(f.current_ndvi for f in user_fields) / user_fields.count()) if user_fields.count() else 0
+    vigorous_count = sum(1 for f in user_fields if f.health_status == 'vigorous')
+    attention_count = sum(1 for f in user_fields if f.health_status in ['stressed', 'critical'])
+
+    vegetables = Vegetable.objects.all()
+
+    # Serialize fields for Leaflet map markers
+    fields_geojson = []
+    for f in user_fields:
+        color = '#15803d' if f.health_status == 'vigorous' else ('#eab308' if f.health_status == 'moderate' else '#ef4444')
+        fields_geojson.append({
+            'id': f.id,
+            'name': f.name,
+            'crop': f.crop.name if f.crop else 'Unspecified',
+            'area': float(f.area_hectares),
+            'lat': f.latitude,
+            'lng': f.longitude,
+            'ndvi': f.current_ndvi,
+            'health_display': f.get_health_status_display(),
+            'health_status': f.health_status,
+            'color': color,
+            'irrigation': f.irrigation_system,
+            'notes': f.notes
+        })
+
+    return render(request, 'vegeviewapp/field_map.html', {
+        'fields': user_fields,
+        'fields_json': json.dumps(fields_geojson),
+        'vegetables': vegetables,
+        'total_area': total_area,
+        'avg_ndvi': round(avg_ndvi, 2),
+        'vigorous_count': vigorous_count,
+        'attention_count': attention_count,
+    })
