@@ -353,7 +353,7 @@ def field_map_view(request):
             longitude=float(lng) if lng else 8.6753,
             current_ndvi=ndvi,
             irrigation_system=irrigation,
-            notes=notes
+            notes=notes,
             boundary_geojson=boundary_geojson,
         )
         field.update_health_status()
@@ -385,7 +385,7 @@ def field_map_view(request):
             'health_status': f.health_status,
             'color': color,
             'irrigation': f.irrigation_system,
-            'notes': f.notes
+            'notes': f.notes,
             'boundary': json.loads(f.boundary_geojson) if f.boundary_geojson else None,
         })
 
