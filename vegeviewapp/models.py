@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class Vegetable(models.Model):
@@ -95,3 +96,67 @@ class PestDisease(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_problem_type_display()})"
+
+
+class FarmField(models.Model):
+    HEALTH_CHOICES = [
+        ('vigorous', 'Vigorous Growth (NDVI >= 0.70)'),
+        ('moderate', 'Moderate Health (NDVI 0.45 - 0.69)'),
+        ('stressed', 'Stressed / Water Deficit (NDVI 0.25 - 0.44)'),
+        ('critical', 'Critical / Degraded (NDVI < 0.25)'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='fields'
+    )
+    name = models.CharField(max_length=150, help_text="e.g. North Plot - Roma Tomatoes")
+    crop = models.ForeignKey(
+        Vegetable,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='fields'
+    )
+    area_hectares = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=1.5,
+        help_text="Field area in hectares"
+    )
+    latitude = models.FloatField(default=9.0820)
+    longitude = models.FloatField(default=8.6753)
+    current_ndvi = models.FloatField(
+        default=0.75,
+        help_text="Vegetation Index from -1.0 to 1.0 (Healthy crop 0.6 - 0.85)"
+    )
+    health_status = models.CharField(
+        max_length=20,
+        choices=HEALTH_CHOICES,
+        default='vigorous'
+    )
+    irrigation_system = models.CharField(
+        max_length=80,
+        blank=True,
+        default='Drip Irrigation'
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.current_ndvi:.2f} NDVI)"
+
+    def update_health_status(self):
+        if self.current_ndvi >= 0.70:
+            self.health_status = 'vigorous'
+        elif self.current_ndvi >= 0.45:
+            self.health_status = 'moderate'
+        elif self.current_ndvi >= 0.25:
+            self.health_status = 'stressed'
+        else:
+            self.health_status = 'critical'
