@@ -137,6 +137,7 @@ class FarmField(models.Model):
         default='vigorous'
     )
     irrigation_system = models.CharField(
+    boundary_geojson = models.TextField(blank=True, default="", help_text="GeoJSON geometry for polygon plot")
         max_length=80,
         blank=True,
         default='Drip Irrigation'
