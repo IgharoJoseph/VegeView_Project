@@ -8,6 +8,9 @@ pip install -r requirements.txt
 python manage.py collectstatic --no-input
 python manage.py migrate
 
+# Seed vegetable and diagnostic database
+python manage.py seed_diagnostics || true
+
 # Automatically ensure superuser exists with staff and superuser permissions
 python manage.py shell << 'EOF'
 import os
