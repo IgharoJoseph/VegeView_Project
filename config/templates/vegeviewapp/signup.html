@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VegeView</title>
+    <title>Create Account - VegeView</title>
     <link rel="stylesheet" href="{% static 'css/signup.css' %}">
     <script src="{% static 'js/signup.js' %}" defer></script>
 </head>
@@ -19,14 +19,27 @@
     <div class="container">
         <div class="register-form">
             <h2>Create Your Account</h2>
-            <form id="registerForm">
+
+            {% if messages %}
+            <div style="margin-bottom: 1rem;">
+                {% for message in messages %}
+                <div style="padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 8px; {% if message.tags == 'error' %}background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;{% else %}background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form id="registerForm" method="POST" action="{% url 'Signup' %}">
+                {% csrf_token %}
+
                 <label for="full-name">Full Name</label>
-                <input type="text" id="full-name" name="full-name" placeholder="John Doe" required>
+                <input type="text" id="full-name" name="full-name" value="{{ full_name|default:'' }}" placeholder="John Doe" required>
                 
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="johndoe@example.com" required>
+                <input type="email" id="email" name="email" value="{{ email|default:'' }}" placeholder="johndoe@example.com" required>
                 
-                <label for="password">Password</label>
+                <label for="password">Password (at least 6 characters)</label>
                 <input type="password" id="password" name="password" placeholder="********" required>
                 
                 <label for="confirm-password">Confirm Password</label>
@@ -34,15 +47,14 @@
                 
                 <button type="submit">Sign Up</button>
                 
-                <a href="login" class="forgot-password">Already have an account? Login</a>
+                <a href="{% url 'Login' %}" class="forgot-password">Already have an account? Login</a>
             </form>
             <div class="footer-links">
-                <a href="privacy.html" class="privacy-link">Privacy Policy</a>
+                <a href="#" class="privacy-link">Privacy Policy</a>
                 <span>|</span>
-                <a href="terms.html" class="terms-link">Terms of Service</a>
+                <a href="#" class="terms-link">Terms of Service</a>
             </div>
         </div>
     </div>
-
 </body>
 </html>
