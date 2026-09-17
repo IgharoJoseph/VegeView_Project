@@ -498,20 +498,21 @@
         var fieldsData = {{ fields_json|safe }};
         var map = L.map('fieldMap').setView([9.083, 8.676], 14);
 
-        // Standard and satellite tile layers
-        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // CARTO Voyager (OpenStreetMap data served via CARTO CDN with compliant usage) and Esri Satellite
+        var streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
+            subdomains: 'abcd',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank">CARTO</a>'
         }).addTo(map);
 
         var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 18,
-            attribution: 'Tiles &copy; Esri'
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics'
         });
 
         var baseMaps = {
-            "OpenStreetMap": osmLayer,
-            "Satellite Imagery": satelliteLayer
+            "Street & Topo (OSM / CARTO)": streetLayer,
+            "Satellite Imagery (Esri)": satelliteLayer
         };
         L.control.layers(baseMaps).addTo(map);
 
